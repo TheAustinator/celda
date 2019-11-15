@@ -37,19 +37,23 @@
 }
 
 #' @useDynLib celda _colSumByGroup_numeric
-#' @useDynLib celda _colSumByGroup_numeric_sparse
 .colSumByGroupNumeric <- function(x, group, K) {
     group <- factor(group, levels = seq(K))
     if (class(x) == 'dgTMatrix') {
-        n_genes = dim(x)[1]
-        n_cells = dim(x)[2]
-        xLong = as.matrix(data.frame(i=x@i, j=x@j, x=x@x))
-        res <- .Call("_colSumByGroup_numeric_sparse", xLong, group, n_genes, n_cells)
+        res <- .colSumByGroupNumericSparse(x, group, K)
     } else {
         res <- .Call("_colSumByGroup_numeric", x, group)
     }
     return(res)
 }
+
+#' @useDynLib celda _colSumByGroup_numeric_sparse
+.colSumByGroupNumericSparse <- function(x, group, K) {
+    n_genes = dim(x)[1]
+    n_cells = dim(x)[2]
+    xLong = as.matrix(data.frame(i=x@i, j=x@j, x=x@x))
+    res <- .Call("_colSumByGroup_numeric_sparse", xLong, group, n_genes, n_cells)
+    return(res)
 
 #' @useDynLib celda _perplexityG
 .perplexityGLogPx <- function(x, phi, psi, group, L) {
