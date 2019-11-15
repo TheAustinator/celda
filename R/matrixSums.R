@@ -37,6 +37,7 @@
 }
 
 #' @useDynLib celda _colSumByGroup_numeric
+#' @useDynLib celda _colSumByGroup_numeric_sparse
 .colSumByGroupNumeric <- function(x, group, K) {
     group <- factor(group, levels = seq(K))
     if (class(x) == 'dgTMatrix') {

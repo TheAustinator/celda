@@ -101,6 +101,7 @@ END_RCPP
 
 RcppExport SEXP _colSumByGroup(SEXP, SEXP);
 RcppExport SEXP _colSumByGroup_numeric(SEXP, SEXP);
+RcppExport SEXP _colSumByGroup_numeric_sparse(SEXP, SEXP, SEXP, SEXP);
 RcppExport SEXP _colSumByGroupChange(SEXP, SEXP, SEXP, SEXP);
 RcppExport SEXP _perplexityG(SEXP, SEXP, SEXP, SEXP);
 RcppExport SEXP _rowSumByGroup(SEXP, SEXP);
@@ -116,6 +117,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_celda_fastNormPropSqrt", (DL_FUNC) &_celda_fastNormPropSqrt, 2},
     {"_colSumByGroup",         (DL_FUNC) &_colSumByGroup,         2},
     {"_colSumByGroup_numeric", (DL_FUNC) &_colSumByGroup_numeric, 2},
+    {"_colSumByGroup_numeric_sparse", (DL_FUNC) &_colSumByGroup_numeric_sparse, 4},
     {"_colSumByGroupChange",   (DL_FUNC) &_colSumByGroupChange,   4},
     {"_perplexityG",           (DL_FUNC) &_perplexityG,           4},
     {"_rowSumByGroup",         (DL_FUNC) &_rowSumByGroup,         2},
