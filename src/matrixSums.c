@@ -283,5 +283,81 @@ SEXP _colSumByGroup_numeric(SEXP R_x, SEXP R_group)
   return(R_ans);
 }
 
+SEXP _colSumByGroup_numeric_sparse(SEXP R_x, SEXP R_clusters, SEXP R_n_genes, SEXP R_n_cells) {
+  int i;
+  int n_rows = nrows(R_x);
+  double *x = REAL(R_x);
+  int *n_genes = INTEGER(R_n_genes);
+  int *n_cells = INTEGER(R_n_cells);
 
+  // If the grouping variable is not a factor, throw an error
+  if (!isFactor(R_group)) {
+    error("The grouping argument must be a factor");
+  }
 
+  int *cluster_labels = INTEGER(R_group);
+  int n_clusters = nlevels(R_group);
+  // If the sizes of the grouping variable and matrix do not match, throw an error
+  if (LENGTH(R_group) != n_cells) {
+    error("The length of the grouping argument must match the number of columns in the matrix");
+  }
+
+  // Allocate a variable for the return matrix
+  SEXP R_output;
+  PROTECT(R_output = allocMatrix(REALSXP, n_genes, n_clusters));
+  // Set a pointer to the return matrix and initialize the memory
+  double *output = REAL(R_output);
+  Memzero(output, n_genes * n_clusters);
+
+  // Sum the totals for each element of the 'group' variable
+  // Note: columns are iterated over before rows because the compiler appears to store expressions like
+  //       'j * nr' in a temporary variable (as they do not change within inner loop);
+  //       swapping the order of the outer and inner loops slows down the code ~10X
+  for (i = 0; i < n_rows; i++) {
+    int gene = x[i];
+    int cell = x[n_rows + i];
+    double update = x[2 * n_rows + i];
+    int cluster = clusters[cell] - 1;
+    output[cluster * n_genes + gene] += update;
+  }
+
+  UNPROTECT(1);
+  return(R_output);
+}
+
+SEXP _colSumByGroup_numeric_sparse_fast(SEXP R_x, SEXP R_clusters, SEXP R_n_genes, SEXP R_n_cells) {
+  int i;
+  int n_rows = nrows(R_x);
+  double *x = REAL(R_x);
+  int *n_genes = INTEGER(R_n_genes);
+  int *n_cells = INTEGER(R_n_cells);
+
+  // If the grouping variable is not a factor, throw an error
+  if (!isFactor(R_group)) {
+    error("The grouping argument must be a factor");
+  }
+
+  int *cluster_labels = INTEGER(R_group);
+  int n_clusters = nlevels(R_group);
+  // If the sizes of the grouping variable and matrix do not match, throw an error
+  if (LENGTH(R_group) != n_cells) {
+    error("The length of the grouping argument must match the number of columns in the matrix");
+  }
+
+  // Allocate a variable for the return matrix
+  SEXP R_output;
+  PROTECT(R_output = allocMatrix(REALSXP, n_genes, n_clusters));
+  // Set a pointer to the return matrix and initialize the memory
+  double *output = REAL(R_output);
+  Memzero(output, n_genes * n_clusters);
+
+  // Sum the totals for each element of the 'group' variable
+  // Note: columns are iterated over before rows because the compiler appears to store expressions like
+  //       'j * nr' in a temporary variable (as they do not change within inner loop);
+  //       swapping the order of the outer and inner loops slows down the code ~10X
+  for (i = 0; i < n_rows; i++) {
+    output[clusters[x[n_rows + i]] - 1 * n_genes + x[i]] += x[2 * n_rows + i];
+  }
+
+  UNPROTECT(1);
+  return(R_output);
