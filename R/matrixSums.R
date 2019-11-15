@@ -54,6 +54,7 @@
     xLong = as.matrix(data.frame(i=x@i, j=x@j, x=x@x))
     res <- .Call("_colSumByGroup_numeric_sparse", xLong, group, n_genes, n_cells)
     return(res)
+}
 
 #' @useDynLib celda _perplexityG
 .perplexityGLogPx <- function(x, phi, psi, group, L) {
